@@ -12,8 +12,10 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+
 #define SERVER_PORT 9014
 #define BUF_SIZE 1024
+#define DOMAIN_FILEPATH "./ex2/domains.txt"
 
 void process_client(int fd);
 void findDomain(char *domain, char *foundIp);
@@ -40,7 +42,7 @@ int main()
 
   client_addr_size = sizeof(client_addr);
 
-  printf("Comecou a ouvir\n");
+  printf("Comecou a ouvir na porta %d\n", SERVER_PORT);
 
   while (1)
   {
@@ -113,13 +115,13 @@ void process_client(int client_fd)
 
 void findDomain(char *search, char *foundIp)
 {
-  FILE *fp;
+  FILE *fp = NULL;
   char *line = NULL;
   size_t len = 0;
   ssize_t read;
   char *domain = NULL, *ip = NULL;
 
-  fp = fopen("./domains.txt", "r");
+  fp = fopen(DOMAIN_FILEPATH, "r");
   if (fp == NULL)
     erro("ao abrir arquivo");
   // exit(EXIT_FAILURE);
