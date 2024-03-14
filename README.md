@@ -8,6 +8,18 @@ Para compilar todos os executáveis:
 make
 ```
 
+### Compilar server
+
+```sh
+make server
+```
+
+### Compilar client
+
+```sh
+make client
+```
+
 ## Rodar um servidor tcp
 
 ```sh
@@ -22,4 +34,10 @@ Para mais informações ver a help usage page:
 ./server --help
 
 ./server --address 127.0.0.1 --port 9090
+```
+
+## Rodar um cliente
+
+```sh
+./client <ip> <port>
 ```
