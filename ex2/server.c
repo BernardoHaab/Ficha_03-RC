@@ -10,8 +10,9 @@
 #include <stdbool.h>
 #include <arpa/inet.h>
 #include <string.h>
-#include <stdarg.h>
 #include <getopt.h>
+
+#include "debug.h"
 
 #define SERVER_IP_DEFAULT "0.0.0.0"
 #define SERVER_PORT_DEFAULT 9014
@@ -23,49 +24,6 @@
 void error(const char *message) {
 	perror(message);
 	exit(EXIT_FAILURE);
-}
-
-#define DEBUG_MESSAGE_TYPE_ENUM \
-	WRAPPER(ERROR, "\033[1;31m") \
-	WRAPPER(INFO, "\033[1;36m") \
-	WRAPPER(WARNING, "\033[1;33m") \
-	WRAPPER(OK, "\033[1;32m")
-#define DEBUG_MESSAGE_TYPE_STRING_MAX_LENGTH 10
-typedef enum {
-#define WRAPPER(type, color) type,
-	DEBUG_MESSAGE_TYPE_ENUM
-#undef WRAPPER
-} DebugMessageType;
-#define ANSI_LENGTH 10
-
-void debugMessage(
-		FILE *const file,
-		const DebugMessageType type,
-		const char *const format,
-		...
-		) {
-	char typeString[DEBUG_MESSAGE_TYPE_STRING_MAX_LENGTH] = { [0] = '\0' };
-	char colorANSI[ANSI_LENGTH] = { [0] = '\0' };
-
-	va_list args;
-	va_start(args, format);
-
-	switch (type) {
-#define WRAPPER(type, color)                                                   \
-		case (type): {                                                 \
-            strncpy(typeString, #type, DEBUG_MESSAGE_TYPE_STRING_MAX_LENGTH);  \
-            strncpy(colorANSI, color, ANSI_LENGTH);                            \
-            break;                                                             \
-			     }
-        DEBUG_MESSAGE_TYPE_ENUM
-#undef WRAPPER
-    }
-
-	fprintf(file, "%s[%s]\e[0m: ", colorANSI, typeString);
-	vfprintf(file, format, args);
-	fprintf(file, "\n");
-
-	va_end(args);
 }
 
 void processClient(const int clientSocketFD)

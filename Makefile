@@ -3,7 +3,7 @@ all: server client udp_server
 CC=gcc
 CFLAGS=-Wall -Wextra -g -Iinclude
 
-server: ex2/server.c
+server: ex2/server.c src/debug.c
 	$(CC) $(CFLAGS) -o $@ $^
 
 client: ex2/client.c src/debug.c
