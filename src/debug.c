@@ -49,7 +49,6 @@ void debugMessage(
 
 	fprintf(file, "%s[%s]\e[0m: ", colorANSI, typeString);
 	vfprintf(file, format, args);
-	fprintf(file, "\n");
 
 	va_end(args);
 }

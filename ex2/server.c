@@ -45,10 +45,10 @@ void processClient(const int clientSocketFD)
 			debugMessage(
 					stderr,
 					INFO,
-					"Client Closed the connection"
+					"Client Closed the connection\n"
 				    );
 		} else {
-			debugMessage(stderr, ERROR, "Reading from client");
+			debugMessage(stderr, ERROR, "Reading from client\n");
 		}
 	} while (nread > 0);
 
@@ -126,7 +126,7 @@ int main(int argc, char **argv)
 		error("Error opening socket\n");
 	}
 
-	debugMessage(stdout, OK, "TCP Socket successfully opened!");
+	debugMessage(stdout, OK, "TCP Socket successfully opened!\n");
 
 	if (bind(
 				serverSocketFD,
@@ -138,7 +138,7 @@ int main(int argc, char **argv)
 
 	char ipAddressString[INET_ADDRSTRLEN] = {0};
 	debugMessage(stdout, OK, "Successfully binded to "
-			"\e[1;31m%s\e[0m:\e[1;32m%d\e[0m",
+			"\e[1;31m%s\e[0m:\e[1;32m%d\e[0m\n",
 			inet_ntop(
 				AF_INET,
 				&serverIPAddress.sin_addr,
@@ -146,14 +146,14 @@ int main(int argc, char **argv)
 				INET_ADDRSTRLEN
 				),
 			ntohs(serverIPAddress.sin_port));
-	debugMessage(stdout, INFO, "Listening for connections...");
+	debugMessage(stdout, INFO, "Listening for connections...\n");
 
 	if (listen(serverSocketFD, LISTEN_N_CONNECTIONS) < 0) {
 		error("Error listening for packets\n");
 	}
 
 	debugMessage(stdout, OK, "Successfully started listening "
-			"for client connections...");
+			"for client connections...\n");
 
 	printf("\n");
 
