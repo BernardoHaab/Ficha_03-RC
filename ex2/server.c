@@ -11,12 +11,14 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <stdarg.h>
+#include <getopt.h>
 
-#define SERVER_IP "127.0.0.1"
-#define SERVER_PORT 9014
+#define SERVER_IP_DEFAULT "0.0.0.0"
+#define SERVER_PORT_DEFAULT 9014
 #define BUFFER_SIZE 1024
-#define DOMAIN_FILEPATH "./ex2/domains.txt"
+#define DOMAIN_FILEPATH "domains.txt"
 #define LISTEN_N_CONNECTIONS 5
+#define loop for(;;)
 
 void error(const char *message) {
 	perror(message);
@@ -79,7 +81,6 @@ void processClient(const int clientSocketFD)
 		buffer[nread] = '\0';
 
 		if (nread > 0) {
-			printf("%s\n", buffer);
 			printf("Received %d bytes: %s\n", nread, buffer);
 			fflush(stdout);
 		} else if (nread == 0) {
@@ -96,15 +97,71 @@ void processClient(const int clientSocketFD)
 	close(clientSocketFD);
 }
 
-int main(void)
+void usage(const char *const programName) {
+    printf("Usage: %s [options]\n", programName);
+    printf("Options:\n");
+    printf("  -a, --address <ip address>   Set the server IP address\n");
+    printf("  -p, --port <port>            Set the server port number\n");
+    printf("  -f, --file <filepath>        Set the domain file text\n");
+    printf("  -h, --help                   Print this usage message\n");
+
+    exit(EXIT_FAILURE);
+}
+
+int main(int argc, char **argv)
 {
+	int c;
+	char *ipAddress = SERVER_IP_DEFAULT;
+	int port = SERVER_PORT_DEFAULT;
+	char *filePath = NULL;
+
+	static struct option long_options[] = {
+		{"address", required_argument, 0, 'a'},
+		{"port",    required_argument, 0, 'p'},
+		{"file",    required_argument, 0, 'f'},
+		{"help",    no_argument,       0, 'h'},
+		{0,         0,                 0, 0}
+	};
+
+	loop {
+		int option_index = 0;
+		c = getopt_long(
+				argc,
+				argv,
+				"a:p:f:h",
+				long_options,
+				&option_index
+			       );
+		if (c == -1) break;
+
+		switch (c) {
+			case 'a':
+				ipAddress = optarg;
+				break;
+			case 'p':
+				port = atoi(optarg);
+				break;
+			case 'f':
+				filePath = optarg;
+				break;
+			case 'h':
+				usage(argv[0]);
+				return 0;
+			case ':':
+			case '?':
+			default:
+				usage(argv[0]);
+				break;
+		}
+	}
+
 	int serverSocketFD, clientSocketFD;
 	struct sockaddr_in serverIPAddress = {0};
 	struct sockaddr_in clientIPAddress = {0};
 
 	serverIPAddress.sin_family = AF_INET;
-	serverIPAddress.sin_addr.s_addr = inet_addr(SERVER_IP);
-	serverIPAddress.sin_port = htons(SERVER_PORT);
+	serverIPAddress.sin_addr.s_addr = inet_addr(ipAddress);
+	serverIPAddress.sin_port = htons(port);
 
 	serverSocketFD = socket(AF_INET, SOCK_STREAM, 0);
 	if (serverSocketFD < 0) {
