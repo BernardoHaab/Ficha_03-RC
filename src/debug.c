@@ -1,7 +1,12 @@
 #include <arpa/inet.h>
+#include <bits/types/struct_iovec.h>
+#include <netinet/in.h>
 #include <stdarg.h>
+#include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/socket.h>
 
 #include "debug.h"
 
@@ -36,6 +41,9 @@ void debugMessage(
 		const char *const format,
 		...
 		) {
+	// BUG: debugCounter is a static variable but is not shared between
+	// processes leading to incongruent log counts. Fix: shared memory.
+	static size_t debugCounter = 1;
 	char typeString[DEBUG_MESSAGE_TYPE_STRING_MAX_LENGTH] = { [0] = '\0' };
 	char colorANSI[ANSI_LENGTH] = { [0] = '\0' };
 
@@ -53,7 +61,18 @@ void debugMessage(
 #undef WRAPPER
     }
 
-	fprintf(file, "%s[%s]\e[0m: ", colorANSI, typeString);
+	static const int maxLen = DEBUG_MESSAGE_TYPE_STRING_MAX_LENGTH;
+	const int halfLength = strnlen(typeString, maxLen) / 2;
+	const int leftSpace  = maxLen / 2 + halfLength;
+	const int rightSpace = maxLen / 2 - halfLength;
+	fprintf(file, "[%03zu]%s[%*s%*s]\e[0m: ",
+			debugCounter++,
+			colorANSI,
+			leftSpace,
+			typeString,
+			rightSpace,
+			""
+	       );
 	vfprintf(file, format, args);
 
 	va_end(args);
