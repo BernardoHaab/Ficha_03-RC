@@ -38,7 +38,7 @@ void processClient(
 
 		if (nread > 0) {
 			char ipAddressString[INET_ADDRSTRLEN] = { [0] = '\0' };
-			printf("[%s:%hu] Received %d bytes: %s\n",
+			printf("[%s:%-6hu] Received %d bytes: %s\n",
 					inet_ntop(
 						AF_INET,
 						&clientIPAddress.sin_addr,
