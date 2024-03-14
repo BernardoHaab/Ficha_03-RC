@@ -37,7 +37,18 @@ void processClient(
 		buffer[nread] = '\0';
 
 		if (nread > 0) {
-			printf("Received %d bytes: %s\n", nread, buffer);
+			char ipAddressString[INET_ADDRSTRLEN] = { [0] = '\0' };
+			printf("[%s:%hu] Received %d bytes: %s\n",
+					inet_ntop(
+						AF_INET,
+						&clientIPAddress.sin_addr,
+						ipAddressString,
+						INET_ADDRSTRLEN
+						),
+					clientIPAddress.sin_port,
+					nread,
+					buffer);
+
 			fflush(stdout);
 		} else if (nread == 0) {
 			debugMessage(
