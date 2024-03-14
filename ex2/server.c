@@ -137,7 +137,7 @@ int main(int argc, char **argv)
 
 	char ipAddressString[INET_ADDRSTRLEN] = {0};
 	debugMessage(stdout, OK, "Successfully binded to "
-			"\e[1;31m%s\e[0m:\e[1;32m%d\e[0m\n",
+			RED "%s" RESET ":" GREEN "%d" RESET "\n",
 			inet_ntop(
 				AF_INET,
 				&serverIPAddress.sin_addr,

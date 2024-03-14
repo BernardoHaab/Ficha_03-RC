@@ -65,7 +65,7 @@ void debugMessage(
 	const int halfLength = strnlen(typeString, maxLen) / 2;
 	const int leftSpace  = maxLen / 2 + halfLength;
 	const int rightSpace = maxLen / 2 - halfLength;
-	fprintf(file, "[%03zu]%s[%*s%*s]\e[0m: ",
+	fprintf(file, "[%03zu]%s[%*s%*s]" RESET ": ",
 			debugCounter++,
 			colorANSI,
 			leftSpace,
