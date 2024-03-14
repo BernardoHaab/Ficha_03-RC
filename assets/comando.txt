@@ -1,1 +1,0 @@
-gcc -Wall -Wextra -o <saida> <arquivo>
