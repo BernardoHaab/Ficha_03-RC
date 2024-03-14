@@ -104,7 +104,6 @@ int main(void)
 
 	serverIPAddress.sin_family = AF_INET;
 	serverIPAddress.sin_addr.s_addr = inet_addr(SERVER_IP);
-	serverIPAddress.sin_addr.s_addr = htonl(INADDR_ANY);
 	serverIPAddress.sin_port = htons(SERVER_PORT);
 
 	serverSocketFD = socket(AF_INET, SOCK_STREAM, 0);
@@ -131,7 +130,7 @@ int main(void)
 				ipAddressString,
 				INET_ADDRSTRLEN
 				),
-			SERVER_PORT);
+			ntohs(serverIPAddress.sin_port));
 	debugMessage(stdout, INFO, "Listening for connections...");
 
 	if (listen(serverSocketFD, LISTEN_N_CONNECTIONS) < 0) {
