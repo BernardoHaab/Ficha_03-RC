@@ -3,10 +3,12 @@ all: server client udp_server
 CC=gcc
 CFLAGS=-Wall -Wextra -g -I$(PWD)/include
 
-server: ex2/server.c src/debug.c
+SRC_DIR = src
+
+server: $(SRC_DIR)/server.c $(SRC_DIR)/debug.c
 	$(CC) $(CFLAGS) -o $@ $^
 
-client: ex2/client.c src/debug.c
+client: $(SRC_DIR)/client.c $(SRC_DIR)/debug.c
 	$(CC) $(CFLAGS) -o $@ $^
 
 udp_server: ex3/udp_server.c
