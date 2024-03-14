@@ -1,79 +1,48 @@
-/***********************************************************************
- * CLIENTE liga ao servidor (definido em argv[1]) no porto especificado
- * (em argv[2]), escrevendo a palavra predefinida (em argv[3]).
- * USO: >cliente <enderecoServidor> <porto> <Palavra>
- ***********************************************************************/
+#include <arpa/inet.h>
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
-#include <netdb.h>
 
-#define SERVER_PORT 9002
-#define BUFF_SIZE 1024
+#include "debug.h"
 
-void sendIp(int fd);
-void erro(char *msg);
-
-int main(int argc, char *argv[])
+void usage(const char *const programName)
 {
-  char endServer[100];
-  int fd;
-  struct sockaddr_in addr;
-  struct hostent *hostPtr;
-  if (argc != 4)
-  {
-    printf("cliente <host> <port> <string>\n");
-    exit(-1);
-  }
-  strcpy(endServer, argv[1]);
-  if ((hostPtr = gethostbyname(endServer)) == 0)
-    erro("Nao consegui obter endereço");
-  bzero((void *)&addr, sizeof(addr));
-  addr.sin_family = AF_INET;
-  addr.sin_addr.s_addr = INADDR_ANY;
-  addr.sin_port = htons((short)atoi(argv[2]));
-
-  if ((fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-    erro("socket");
-  if (connect(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
-    erro("Connect");
-
-  // write(fd, argv[3], 1 + strlen(argv[3]));
-
-  sendIp(fd);
-
-  close(fd);
-  exit(0);
+	fprintf(stderr, "Usage: %s <ip address> <port>\n", programName);
+	exit(EXIT_FAILURE);
 }
 
-void sendIp(int fd)
+int main(int argc, char **argv)
 {
-  char res[BUFF_SIZE];
+	struct sockaddr_in serverIPAddress = {0};
+	int socketFD;
 
-  read(fd, res, BUFF_SIZE - 1);
-  printf("%s", res);
-  bzero((void *)&res, sizeof(res));
+	if (argc < 3) {
+		usage(argv[0]);
+		exit(EXIT_FAILURE);
+	}
 
-  char domain[100];
+	serverIPAddress.sin_family = AF_INET;
+	serverIPAddress.sin_addr.s_addr = inet_addr(argv[1]);
+	serverIPAddress.sin_port = htons(atoi(argv[2]));
 
-  while (strcmp(domain, "SAIR") != 0)
-  {
-    scanf("%s", domain);
+	debugMessage(stdout, INFO, "Connecting to server: ");
+	printSocketIP(stdout, true, serverIPAddress);
 
-    write(fd, domain, sizeof(domain));
+	if ((socketFD = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+		error("Error creating socket\n");
+	}
 
-    read(fd, res, BUFF_SIZE - 1);
-    printf("%s\n", res);
-    bzero((void *)&res, sizeof(res));
-  }
-}
+	if (connect(
+				socketFD,
+				(struct sockaddr *) &serverIPAddress,
+				sizeof(serverIPAddress)
+		   ) < 0) {
+		error("Error Connecting to server\n");
+	}
 
-void erro(char *msg)
-{
-  printf("Erro: %s\n", msg);
-  exit(-1);
+	sleep(1);
+
+	close(socketFD);
+
+	return 0;
 }
