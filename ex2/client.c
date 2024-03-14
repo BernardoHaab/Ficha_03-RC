@@ -3,10 +3,13 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
 #include "debug.h"
+
+#define BUFFER_SIZE 1024
 
 void usage(const char *const programName)
 {
@@ -18,6 +21,7 @@ int main(int argc, char **argv)
 {
 	struct sockaddr_in serverIPAddress = {0};
 	int socketFD;
+	char buffer[BUFFER_SIZE] = { [0] = '\0' };
 
 	if (argc < 3) {
 		usage(argv[0]);
@@ -42,6 +46,11 @@ int main(int argc, char **argv)
 		   ) < 0) {
 		error("Error Connecting to server\n");
 	}
+
+	printf("> ");
+	scanf(" %[^\n]%*c", buffer);
+
+	write(socketFD, buffer, strnlen(buffer, BUFFER_SIZE));
 
 	sleep(1);
 
