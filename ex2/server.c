@@ -21,12 +21,10 @@
 #define LISTEN_N_CONNECTIONS 5
 #define loop for(;;)
 
-void error(const char *message) {
-	perror(message);
-	exit(EXIT_FAILURE);
-}
-
-void processClient(const int clientSocketFD)
+void processClient(
+		const int clientSocketFD,
+		const struct sockaddr_in clientIPAddress
+		)
 {
 	char buffer[BUFFER_SIZE + 1] = {
 		[0] = '\0',
@@ -45,8 +43,9 @@ void processClient(const int clientSocketFD)
 			debugMessage(
 					stderr,
 					INFO,
-					"Client Closed the connection\n"
+					"Client Closed the connection: "
 				    );
+			printSocketIP(stdout, true, clientIPAddress);
 		} else {
 			debugMessage(stderr, ERROR, "Reading from client\n");
 		}
@@ -155,27 +154,27 @@ int main(int argc, char **argv)
 	debugMessage(stdout, OK, "Successfully started listening "
 			"for client connections...\n");
 
-	printf("\n");
-
 	const long clientIPAddressSize = sizeof(clientIPAddress);
 
 	while (true) {
 		// NOTE: Clean finished child process to avoid zombies
 		while (waitpid(-1, NULL, WNOHANG) > 0);
 
-		clientSocketFD = accept(
-				serverSocketFD,
-				(struct sockaddr *) &clientIPAddress,
-				(socklen_t *) &clientIPAddressSize
-				);
-
-		if (clientSocketFD <= 0) {
+		if ((clientSocketFD = accept(
+			serverSocketFD,
+			(struct sockaddr *) &clientIPAddress,
+			(socklen_t *) &clientIPAddressSize
+			)
+		    ) <= 0) {
 			continue;
 		}
 
+		debugMessage(stdout, OK, "New Connection with client: ");
+		printSocketIP(stdout, true, clientIPAddress);
+
 		if (fork() == 0) {
 			close(serverSocketFD);
-			processClient(clientSocketFD);
+			processClient(clientSocketFD, clientIPAddress);
 			exit(0);
 		}
 

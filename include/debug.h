@@ -1,6 +1,7 @@
-#include <sys/socket.h>
 #include <netinet/in.h>
+#include <stdbool.h>
 #include <stdio.h>
+#include <sys/socket.h>
 
 #define DEBUG_MESSAGE_TYPE_ENUM \
 	WRAPPER(ERROR, "\033[1;31m") \
@@ -16,10 +17,15 @@ typedef enum {
 #define ANSI_LENGTH 10
 
 
-void printSocketIP(FILE *const file, struct sockaddr_in address);
+void printSocketIP(
+		FILE *const file,
+		const bool brief,
+		const struct sockaddr_in address
+		);
 void debugMessage(
 		FILE *const file,
 		const DebugMessageType type,
 		const char *const format,
 		...
 		);
+void error(const char *const message);

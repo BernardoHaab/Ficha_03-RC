@@ -1,19 +1,25 @@
 #include <arpa/inet.h>
 #include <stdarg.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "debug.h"
 
-#define FORMAT \
+#define IP_FORMAT \
 	"{\n" \
 	"    Address: %s\n" \
 	"    Port: %d\n" \
 	"}\n"
+#define IP_FORMAT_BRIEF "%s:%d\n"
 
-void printSocketIP(FILE *const file, struct sockaddr_in address)
+void printSocketIP(
+		FILE *const file,
+		const bool brief,
+		const struct sockaddr_in address
+		)
 {
 	char ipAddressString[INET_ADDRSTRLEN] = { [0] = '\0' };
-	fprintf(file, FORMAT,
+	fprintf(file, brief ? IP_FORMAT_BRIEF : IP_FORMAT,
 			inet_ntop(
 				AF_INET,
 				&address.sin_addr,
@@ -51,4 +57,10 @@ void debugMessage(
 	vfprintf(file, format, args);
 
 	va_end(args);
+}
+
+void error(const char *const message) {
+	debugMessage(stderr, ERROR, "%s", message);
+	perror(message);
+	exit(EXIT_FAILURE);
 }
