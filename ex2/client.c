@@ -1,4 +1,5 @@
 #include <arpa/inet.h>
+#include <bits/types/struct_iovec.h>
 #include <netinet/in.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -10,6 +11,7 @@
 #include "debug.h"
 
 #define BUFFER_SIZE 1024
+#define loop for (;;)
 
 void usage(const char *const programName)
 {
@@ -47,12 +49,19 @@ int main(int argc, char **argv)
 		error("Error Connecting to server\n");
 	}
 
-	printf("> ");
-	scanf(" %[^\n]%*c", buffer);
+	loop {
+		printf("> ");
+		if (scanf(" %[^\n]%*c", buffer) == EOF) {
+			break;
+		}
 
-	write(socketFD, buffer, strnlen(buffer, BUFFER_SIZE));
+		const size_t bufferLength = strnlen(buffer, BUFFER_SIZE);
 
-	sleep(1);
+		write(socketFD, buffer, bufferLength);
+	}
+
+	debugMessage(stdout, INFO, "Closing connection with server ");
+	printSocketIP(stdout, true, serverIPAddress);
 
 	close(socketFD);
 
