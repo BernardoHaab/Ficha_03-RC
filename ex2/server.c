@@ -1,161 +1,170 @@
-/*******************************************************************************
- * SERVIDOR no porto 9000, à escuta de novos clientes. Quando surgem
- * novos clientes os dados por eles enviados são lidos e descarregados no ecran.
- *******************************************************************************/
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <netdb.h>
-#include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <stdbool.h>
+#include <arpa/inet.h>
+#include <string.h>
+#include <stdarg.h>
 
+#define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 9014
-#define BUF_SIZE 1024
+#define BUFFER_SIZE 1024
 #define DOMAIN_FILEPATH "./ex2/domains.txt"
+#define LISTEN_N_CONNECTIONS 5
 
-void process_client(int fd);
-void findDomain(char *domain, char *foundIp);
-void erro(char *msg);
-
-int main()
-{
-  int fd, client;
-  struct sockaddr_in addr, client_addr;
-  int client_addr_size;
-  bzero((void *)&addr, sizeof(addr));
-  addr.sin_family = AF_INET;
-  addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  addr.sin_port = htons(SERVER_PORT);
-
-  if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-    erro("na funcao socket");
-
-  if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
-    erro("na funcao bind");
-
-  if (listen(fd, 5) < 0)
-    erro("na funcao listen");
-
-  client_addr_size = sizeof(client_addr);
-
-  printf("Comecou a ouvir na porta %d\n", SERVER_PORT);
-
-  while (1)
-  {
-    // clean finished child processes, avoiding zombies
-    // must use WNOHANG or would block whenever a child process was still working
-    while (waitpid(-1, NULL, WNOHANG) > 0)
-      ;
-    // wait for new connection
-    client = accept(fd, (struct sockaddr *)&client_addr, (socklen_t *)&client_addr_size);
-    if (client > 0)
-    {
-      if (fork() == 0)
-      {
-        close(fd);
-        process_client(client);
-        exit(0);
-      }
-      close(client);
-    }
-  }
-  return 0;
-}
-void process_client(int client_fd)
-{
-  char buffer[BUF_SIZE];
-
-  char *msg = "Bem-vindo ao servidor de nomes do DEI. Indique o nome de domínio\n";
-  write(client_fd, msg, 66);
-
-  read(client_fd, buffer, BUF_SIZE - 1);
-  printf("%s", buffer);
-
-  while (strncmp(buffer, "SAIR", 5))
-  {
-    char ip[15];
-    findDomain(buffer, ip);
-
-    printf("strlen(ip): %ld", strlen(ip));
-
-    char resMessage[100];
-
-    if (strlen(ip) > 0)
-    {
-      strcat(resMessage, "O nome de domínio ");
-      strcat(resMessage, buffer);
-      strcat(resMessage, " tem associado o endereço IP ");
-      strcat(resMessage, ip);
-      // sprintf(resMessage, "O nome de domínio %s tem associado o endereço IP %s", buffer, resMessage);
-    }
-    else
-    {
-      strcat(resMessage, "O nome de domínio ");
-      strcat(resMessage, buffer);
-      strcat(resMessage, " não tem um endereço IP associado ");
-      // sprintf(resMessage, "O nome de domínio %s não tem um endereço IP associado", buffer);
-    }
-
-    printf("Teste: %s", resMessage);
-
-    write(client_fd, resMessage, strlen(resMessage));
-
-    bzero((void *)&resMessage, strlen(resMessage));
-    bzero((void *)&buffer, sizeof(buffer));
-    read(client_fd, buffer, BUF_SIZE - 1);
-    printf("%s", buffer);
-  }
-
-  close(client_fd);
+void error(const char *message) {
+	perror(message);
+	exit(EXIT_FAILURE);
 }
 
-void findDomain(char *search, char *foundIp)
-{
-  FILE *fp = NULL;
-  char *line = NULL;
-  size_t len = 0;
-  ssize_t read;
-  char *domain = NULL, *ip = NULL;
+#define DEBUG_MESSAGE_TYPE_ENUM \
+	WRAPPER(ERROR, "\033[1;31m") \
+	WRAPPER(INFO, "\033[1;36m") \
+	WRAPPER(WARNING, "\033[1;33m") \
+	WRAPPER(OK, "\033[1;32m")
+#define DEBUG_MESSAGE_TYPE_STRING_MAX_LENGTH 10
+typedef enum {
+#define WRAPPER(type, color) type,
+	DEBUG_MESSAGE_TYPE_ENUM
+#undef WRAPPER
+} DebugMessageType;
+#define ANSI_LENGTH 10
 
-  fp = fopen(DOMAIN_FILEPATH, "r");
-  if (fp == NULL)
-    erro("ao abrir arquivo");
-  // exit(EXIT_FAILURE);
+void debugMessage(
+		FILE *const file,
+		const DebugMessageType type,
+		const char *const format,
+		...
+		) {
+	char typeString[DEBUG_MESSAGE_TYPE_STRING_MAX_LENGTH] = { [0] = '\0' };
+	char colorANSI[ANSI_LENGTH] = { [0] = '\0' };
 
-  while ((read = getline(&line, &len, fp)) != -1)
-  {
-    char delim[] = " ";
-    printf("Retrieved line of length %zu:\n", read);
+	va_list args;
+	va_start(args, format);
 
-    domain = strtok(line, delim);
-    ip = strtok(NULL, delim);
-
-    printf("search: .%s.\n", search);
-    printf("domain: .%s.\n", domain);
-    printf("ip: %s\n", ip);
-
-    if (strncmp(domain, search, strlen(search)) == 0)
-    {
-      strcpy(foundIp, ip);
+	switch (type) {
+#define WRAPPER(type, color)                                                   \
+		case (type): {                                                 \
+            strncpy(typeString, #type, DEBUG_MESSAGE_TYPE_STRING_MAX_LENGTH);  \
+            strncpy(colorANSI, color, ANSI_LENGTH);                            \
+            break;                                                             \
+			     }
+        DEBUG_MESSAGE_TYPE_ENUM
+#undef WRAPPER
     }
-  }
-  printf("Saiu");
 
-  printf("IP encontrado: %s", foundIp);
+	fprintf(file, "%s[%s]\e[0m: ", colorANSI, typeString);
+	vfprintf(file, format, args);
+	fprintf(file, "\n");
 
-  fclose(fp);
-  if (line)
-    free(line);
-
-  // return res;
+	va_end(args);
 }
 
-void erro(char *msg)
+void processClient(const int clientSocketFD)
 {
-  printf("Erro: %s\n", msg);
-  exit(-1);
+	char buffer[BUFFER_SIZE + 1] = {
+		[0] = '\0',
+		[BUFFER_SIZE] = '\0'
+	};
+
+	int nread = 0;
+	do {
+		nread = read(clientSocketFD, buffer, BUFFER_SIZE);
+		buffer[nread] = '\0';
+
+		if (nread > 0) {
+			printf("%s\n", buffer);
+			printf("Received %d bytes: %s\n", nread, buffer);
+			fflush(stdout);
+		} else if (nread == 0) {
+			debugMessage(
+					stderr,
+					INFO,
+					"Client Closed the connection"
+				    );
+		} else {
+			debugMessage(stderr, ERROR, "Reading from client");
+		}
+	} while (nread > 0);
+
+	close(clientSocketFD);
+}
+
+int main(void)
+{
+	int serverSocketFD, clientSocketFD;
+	struct sockaddr_in serverIPAddress = {0};
+	struct sockaddr_in clientIPAddress = {0};
+
+	serverIPAddress.sin_family = AF_INET;
+	serverIPAddress.sin_addr.s_addr = inet_addr(SERVER_IP);
+	serverIPAddress.sin_addr.s_addr = htonl(INADDR_ANY);
+	serverIPAddress.sin_port = htons(SERVER_PORT);
+
+	serverSocketFD = socket(AF_INET, SOCK_STREAM, 0);
+	if (serverSocketFD < 0) {
+		error("Error opening socket\n");
+	}
+
+	debugMessage(stdout, OK, "TCP Socket successfully opened!");
+
+	if (bind(
+				serverSocketFD,
+				(struct sockaddr *) &serverIPAddress,
+				sizeof(serverIPAddress)
+		) < 0) {
+		error("Error binding socket\n");
+	}
+
+	char ipAddressString[INET_ADDRSTRLEN] = {0};
+	debugMessage(stdout, OK, "Successfully binded to \e[1;31m%s\e[0m:\e[1;32m%d\e[0m",
+			inet_ntop(
+				AF_INET,
+				&serverIPAddress.sin_addr,
+				ipAddressString,
+				INET_ADDRSTRLEN
+				),
+			SERVER_PORT);
+	debugMessage(stdout, INFO, "Listening for connections...");
+
+	if (listen(serverSocketFD, LISTEN_N_CONNECTIONS) < 0) {
+		error("Error listening for packets\n");
+	}
+
+	debugMessage(stdout, OK, "Successfully started listening for client connections...");
+
+	printf("\n");
+
+	const long clientIPAddressSize = sizeof(clientIPAddress);
+
+	while (true) {
+		// NOTE: Clean finished child process to avoid zombies
+		while (waitpid(-1, NULL, WNOHANG) > 0);
+
+		clientSocketFD = accept(
+				serverSocketFD,
+				(struct sockaddr *) &clientIPAddress,
+				(socklen_t *) &clientIPAddressSize
+				);
+
+		if (clientSocketFD <= 0) {
+			continue;
+		}
+
+		if (fork() == 0) {
+			close(serverSocketFD);
+			processClient(clientSocketFD);
+			exit(0);
+		}
+
+		close(clientSocketFD);
+	}
+
+	return 0;
 }
