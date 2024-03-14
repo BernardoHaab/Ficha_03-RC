@@ -123,7 +123,8 @@ int main(void)
 	}
 
 	char ipAddressString[INET_ADDRSTRLEN] = {0};
-	debugMessage(stdout, OK, "Successfully binded to \e[1;31m%s\e[0m:\e[1;32m%d\e[0m",
+	debugMessage(stdout, OK, "Successfully binded to "
+			"\e[1;31m%s\e[0m:\e[1;32m%d\e[0m",
 			inet_ntop(
 				AF_INET,
 				&serverIPAddress.sin_addr,
@@ -137,7 +138,8 @@ int main(void)
 		error("Error listening for packets\n");
 	}
 
-	debugMessage(stdout, OK, "Successfully started listening for client connections...");
+	debugMessage(stdout, OK, "Successfully started listening "
+			"for client connections...");
 
 	printf("\n");
 
