@@ -19,6 +19,7 @@
 #define BUFFER_SIZE 1024
 #define DOMAIN_FILEPATH "domains.txt"
 #define LISTEN_N_CONNECTIONS 5
+#define MOTD "Bem-vindo ao servidor de nomes do DEI. Indique o nome de dominio"
 #define loop for(;;)
 
 void processClient(
@@ -26,19 +27,21 @@ void processClient(
 		const struct sockaddr_in clientIPAddress
 		)
 {
-	char buffer[BUFFER_SIZE + 1] = {
+	char receivedBuffer[BUFFER_SIZE] = {
 		[0] = '\0',
-		[BUFFER_SIZE] = '\0'
+		[BUFFER_SIZE - 1] = '\0'
 	};
+
+	static const char responseBuffer[BUFFER_SIZE] = "";
 
 	int nread = 0;
 	do {
-		nread = read(clientSocketFD, buffer, BUFFER_SIZE);
-		buffer[nread] = '\0';
+		nread = read(clientSocketFD, receivedBuffer, BUFFER_SIZE);
+		receivedBuffer[nread] = '\0';
 
 		if (nread > 0) {
 			char ipAddressString[INET_ADDRSTRLEN] = { [0] = '\0' };
-			printf("[%s:%-6hu] Received %d bytes: %s\n",
+			printf("[%s:%-6hu] Received %4d bytes: %s\n",
 					inet_ntop(
 						AF_INET,
 						&clientIPAddress.sin_addr,
@@ -47,7 +50,7 @@ void processClient(
 						),
 					clientIPAddress.sin_port,
 					nread,
-					buffer);
+					receivedBuffer);
 
 			fflush(stdout);
 		} else if (nread == 0) {
@@ -60,6 +63,8 @@ void processClient(
 		} else {
 			debugMessage(stderr, ERROR, "Reading from client\n");
 		}
+
+		write(clientSocketFD, responseBuffer, BUFFER_SIZE);
 	} while (nread > 0);
 
 	close(clientSocketFD);
@@ -74,6 +79,11 @@ void usage(const char *const programName) {
     printf("  -h, --help                   Print this usage message\n");
 
     exit(EXIT_FAILURE);
+}
+
+void sendMOTD(const int socketFD, const char *const motd)
+{
+	write(socketFD, motd, strnlen(motd, BUFFER_SIZE));
 }
 
 int main(int argc, char **argv)
@@ -167,7 +177,7 @@ int main(int argc, char **argv)
 
 	const long clientIPAddressSize = sizeof(clientIPAddress);
 
-	while (true) {
+	loop {
 		// NOTE: Clean finished child process to avoid zombies
 		while (waitpid(-1, NULL, WNOHANG) > 0);
 
@@ -185,6 +195,7 @@ int main(int argc, char **argv)
 
 		if (fork() == 0) {
 			close(serverSocketFD);
+			sendMOTD(clientSocketFD, MOTD "\n");
 			processClient(clientSocketFD, clientIPAddress);
 			exit(0);
 		}

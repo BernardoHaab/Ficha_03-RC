@@ -50,6 +50,9 @@ int main(int argc, char **argv)
 	}
 
 	loop {
+		read(socketFD, buffer, BUFFER_SIZE);
+		printf("%s", buffer);
+
 		printf("> ");
 		if (scanf(" %[^\n]%*c", buffer) == EOF) {
 			break;
