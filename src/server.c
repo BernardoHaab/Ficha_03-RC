@@ -13,6 +13,7 @@
 #include <getopt.h>
 
 #include "debug.h"
+#include "command.h"
 
 #define SERVER_IP_DEFAULT "0.0.0.0"
 #define SERVER_PORT_DEFAULT 9014
@@ -32,10 +33,10 @@ void processClient(
 		[BUFFER_SIZE - 1] = '\0'
 	};
 
-	static const char responseBuffer[BUFFER_SIZE] = "";
 
 	int nread = 0;
 	do {
+		char responseBuffer[BUFFER_SIZE] = "";
 		nread = read(clientSocketFD, receivedBuffer, BUFFER_SIZE);
 		receivedBuffer[nread] = '\0';
 
@@ -51,6 +52,8 @@ void processClient(
 					clientIPAddress.sin_port,
 					nread,
 					receivedBuffer);
+
+			processCommand(receivedBuffer, BUFFER_SIZE, responseBuffer);
 
 			fflush(stdout);
 		} else if (nread == 0) {

@@ -5,7 +5,7 @@ CFLAGS=-Wall -Wextra -g -I$(PWD)/include
 
 SRC_DIR = src
 
-server: $(SRC_DIR)/server.c $(SRC_DIR)/debug.c
+server: $(SRC_DIR)/server.c $(SRC_DIR)/debug.c $(SRC_DIR)/command.c
 	$(CC) $(CFLAGS) -o $@ $^
 
 client: $(SRC_DIR)/client.c $(SRC_DIR)/debug.c
