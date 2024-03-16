@@ -50,6 +50,8 @@ Para mais informações ver a help usage page:
 ### Rodar um servidor
 
 ```sh
+./udp-server --help
+
 ./udp-server
 ```
 
