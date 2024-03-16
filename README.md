@@ -19,7 +19,7 @@ make udp-client
 
 ## Comunicação servidor-cliente em TCP
 
-### Rodar um servidor tcp
+### Rodar um servidor
 
 ```sh
 ./tpc-server
@@ -45,9 +45,9 @@ Para mais informações ver a help usage page:
 
 ![Demo](assets/demo-tcp.gif)
 
-## Comunicação servidor-client em UDP
+## Comunicação servidor-cliente em UDP
 
-### Rodar um servidor tcp
+### Rodar um servidor
 
 ```sh
 ./udp-server
@@ -56,7 +56,7 @@ Para mais informações ver a help usage page:
 ### Rodar um cliente
 
 ```sh
-./udp-client <ip> <port>
+./udp-client <number>
 ```
 
 ### Demo
