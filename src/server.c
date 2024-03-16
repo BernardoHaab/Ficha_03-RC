@@ -21,6 +21,7 @@
 #define DOMAIN_FILEPATH "domains.txt"
 #define LISTEN_N_CONNECTIONS 5
 #define MOTD "Bem-vindo ao servidor de nomes do DEI. Indique o nome de dominio"
+#define EXIT_MESSAGE "Até logo!"
 #define loop for(;;)
 
 FILE *domainFile = NULL;
@@ -55,9 +56,28 @@ void processClient(
 					nread,
 					receivedBuffer);
 
-			processCommand(receivedBuffer, BUFFER_SIZE, responseBuffer);
+			Command command = processCommand(
+					receivedBuffer,
+					BUFFER_SIZE,
+					responseBuffer
+					);
 
 			fflush(stdout);
+
+			if (command == EXIT) {
+				debugMessage(
+						stderr,
+						INFO,
+						"Closing connection with: "
+					    );
+				printSocketIP(stdout, true, clientIPAddress);
+				write(
+						clientSocketFD,
+						EXIT_MESSAGE "\n",
+						sizeof(EXIT_MESSAGE "\n")
+				     );
+				break;
+			}
 		} else if (nread == 0) {
 			debugMessage(
 					stderr,

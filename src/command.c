@@ -8,7 +8,7 @@
 #define DELIMITER " "
 #define DOMAIN_FILE_DELIMITER " "
 
-void processCommand(
+Command processCommand(
 		const char *const buffer,
 		const size_t bufferSize,
 		char *response
@@ -20,12 +20,14 @@ void processCommand(
 	strncpy(bufferClone, buffer, bufferSize);
 
 	char *commandString = strtok(bufferClone, DELIMITER);
-	char *argumentString = strtok(NULL, "");
+	char *argumentString = strtok(NULL, DELIMITER);
 
 	bool commandFound = false;
+	Command command = HELP;
 #define WRAPPER(enum, text, usage, function) \
 	if (strncmp(commandString, text, strlen(text)) == 0) { \
 		commandFound = true; \
+		command = enum; \
 		function(argumentString, response); \
 	}
 	COMMAND_ENUM
@@ -36,6 +38,8 @@ void processCommand(
 	}
 
 	free(bufferCloneFree);
+
+	return command;
 }
 
 void commandHelp(const char *const argument, char *response)
@@ -66,6 +70,11 @@ void commandDomain(const char *const argument, char *response)
 				DOMAIN_NOT_FOUND,
 				argument
 		       );
+		return;
+	}
+
+	if (argument == NULL || argument[0] == '\0') {
+		sprintf(response, "Argument not provided\n");
 		return;
 	}
 
@@ -114,6 +123,11 @@ void commandIp(const char *const argument, char *response)
 		       );
 	}
 
+	if (argument == NULL || argument[0] == '\0') {
+		sprintf(response, "Argument not provided\n");
+		return;
+	}
+
 	fseek(domainFile, 0, SEEK_SET);
 
 	char *line = NULL;
@@ -141,4 +155,11 @@ void commandIp(const char *const argument, char *response)
 				argument
 		       );
 	}
+}
+
+void commandExit(const char *const argument, char *response)
+{
+	(void) argument;
+
+	strcpy(response, "Até logo!\n");
 }

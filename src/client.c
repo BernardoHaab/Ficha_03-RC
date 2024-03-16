@@ -6,11 +6,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include "debug.h"
 
 #define BUFFER_SIZE 1024
+#define EXIT_MESSAGE "Até logo!"
 #define loop for (;;)
 
 void usage(const char *const programName)
@@ -50,8 +52,26 @@ int main(int argc, char **argv)
 	}
 
 	loop {
-		read(socketFD, buffer, BUFFER_SIZE);
-		printf("%s", buffer);
+		ssize_t receivedBytes = read(socketFD, buffer, BUFFER_SIZE);
+		if (receivedBytes > 0) {
+			printf("%s", buffer);
+
+			if (strncmp(
+						buffer,
+						EXIT_MESSAGE "\n",
+						sizeof(EXIT_MESSAGE "\n")
+				   ) == 0) {
+				break;
+			}
+		}
+
+		if (receivedBytes < 0) {
+			perror("Receiving failed");
+			exit(EXIT_FAILURE);
+		} else if (receivedBytes == 0) {
+			break;
+		}
+
 
 		printf("> ");
 		if (scanf(" %[^\n]%*c", buffer) == EOF) {
