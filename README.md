@@ -41,3 +41,7 @@ Para mais informações ver a help usage page:
 ```sh
 ./client <ip> <port>
 ```
+
+## Demo
+
+![Demo](assets/demo.gif)
