@@ -14,6 +14,7 @@
 
 #include "debug.h"
 #include "command.h"
+#include "utils.h"
 
 #define SERVER_IP_DEFAULT "0.0.0.0"
 #define SERVER_PORT_DEFAULT 9014
@@ -57,6 +58,8 @@ void processClient(
 					clientIPAddress.sin_port,
 					nread,
 					receivedBuffer);
+			if (countNChar(receivedBuffer, '\n', BUFFER_SIZE) == 0)
+				printf("\n");
 
 			Command command = processCommand(
 					receivedBuffer,

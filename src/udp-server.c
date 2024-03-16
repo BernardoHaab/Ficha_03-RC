@@ -142,6 +142,7 @@ int main(int argc, char **argv)
 		    si_outra.sin_port,
 		    receivedBytes,
 		    buffer);
+    if (countNChar(buffer, '\n', BUFFER_SIZE) > 0) printf("\n");
 
     decimalToBinary(decimal, binary);
     decToHex(decimal, hexadecimal);

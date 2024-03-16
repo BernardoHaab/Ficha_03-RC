@@ -5,7 +5,7 @@ CFLAGS=-Wall -Wextra -g -I$(PWD)/include
 
 SRC_DIR = src
 
-tcp-server: $(SRC_DIR)/tcp-server.c $(SRC_DIR)/debug.c $(SRC_DIR)/command.c
+tcp-server: $(SRC_DIR)/tcp-server.c $(SRC_DIR)/debug.c $(SRC_DIR)/command.c $(SRC_DIR)/utils.c
 	$(CC) $(CFLAGS) -o $@ $^
 
 tcp-client: $(SRC_DIR)/tcp-client.c $(SRC_DIR)/debug.c
