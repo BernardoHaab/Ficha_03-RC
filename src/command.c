@@ -127,7 +127,7 @@ void commandIp(const char *const argument, char *response)
 
 		if (strcmp(argument, ip) == 0) {
 			found = true;
-			sprintf(response, IP_FOUND, domain, ip);
+			sprintf(response, IP_FOUND, ip, domain);
 			continue;
 		}
 	}
