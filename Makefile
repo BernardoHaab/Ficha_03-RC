@@ -17,6 +17,11 @@ udp-server: $(SRC_DIR)/udp-server.c
 udp-client: $(SRC_DIR)/udp-client.c
 	$(CC) $(CFLAGS) -o $@ $^
 
+archive: ficha03-pl8-BernardoHaab-LuísGóis.zip
+.PHONY: ficha03-pl8-BernardoHaab-LuísGóis.zip
+ficha03-pl8-BernardoHaab-LuísGóis.zip:
+	git archive --output=$@ HEAD
+
 clean:
 	rm -f tcp-server tcp-client udp-server udp-client
 

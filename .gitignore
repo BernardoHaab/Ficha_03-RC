@@ -6,6 +6,7 @@ tcp-server
 udp-client
 udp-server
 .vscode
+*.zip
 # Created by https://www.toptal.com/developers/gitignore/api/c
 # Edit at https://www.toptal.com/developers/gitignore?templates=c
 
