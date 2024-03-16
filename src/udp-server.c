@@ -137,7 +137,7 @@ int main(int argc, char **argv)
 			  si_outra.sin_port,
 			  receivedBytes,
 			  buffer);
-	  if (countNChar(buffer, '\n', BUFFER_SIZE) > 0) printf("\n");
+	  if (countNChar(buffer, '\n', BUFFER_SIZE) == 0) printf("\n");
 
 	  char msg[BUFFER_SIZE] = { [0] = '\0', [BUFFER_SIZE - 1] = '\0' };
 	  sprintf(
