@@ -15,9 +15,6 @@
 #define BUFFER_SIZE 512   // Tamanho do buffer
 #define loop for(;;)
 
-void decimalToBinary(int num, int res[32]);
-void decToHex(int decimal, int hexadecimal[8]);
-
 void erro(char *s)
 {
   perror(s);
@@ -110,118 +107,59 @@ int main(int argc, char **argv)
   		ntohs(si_minha.sin_port));
   debugMessage(stdout, INFO, "Listening for connections...\n");
 
-  // Espera recepção de mensagem (a chamada é bloqueante)
-  if ((receivedBytes = recvfrom(
+  do {
+	  // Espera recepção de mensagem (a chamada é bloqueante)
+	  if ((receivedBytes = recvfrom(
+					  socketFD,
+					  buffer,
+					  BUFFER_SIZE,
+					  0,
+					  (struct sockaddr *) &si_outra,
+					  (socklen_t *) &slen
+				       )) == -1) {
+		  error("Erro no recvfrom");
+	  }
+
+	  // Para ignorar o restante conteúdo (anterior do buffer)
+	  buffer[receivedBytes] = '\0';
+
+	  int decimal = atoi(buffer);
+
+	  printf("[" RED "%s " RESET ":" CYAN "%-6hu" RESET
+			  "] Received " BLUE "%4d" RESET
+			  " bytes: %s",
+			  inet_ntop(
+				  AF_INET,
+				  &si_outra.sin_addr,
+				  ipAddressString,
+				  INET_ADDRSTRLEN
+				  ),
+			  si_outra.sin_port,
+			  receivedBytes,
+			  buffer);
+	  if (countNChar(buffer, '\n', BUFFER_SIZE) > 0) printf("\n");
+
+	  char msg[BUFFER_SIZE] = { [0] = '\0', [BUFFER_SIZE - 1] = '\0' };
+	  sprintf(
+			  msg,
+			  "Número em binário: 0b%b\nNúmero em hexadecimal: 0x%X\n",
+			  decimal,
+			  decimal
+		 );
+
+	  if (sendto(
 				  socketFD,
-				  buffer,
-				  BUFFER_SIZE,
+				  msg,
+				  strlen(msg),
 				  0,
-				  (struct sockaddr *)&si_outra,
-				  (socklen_t *)&slen
-			       )) == -1) {
-    error("Erro no recvfrom");
-  }
-  // Para ignorar o restante conteúdo (anterior do buffer)
-  buffer[receivedBytes] = '\0';
-
-  while (strncmp(buffer, "SAIR", 5) != 0)
-  {
-    int decimal = atoi(buffer);
-    int binary[32] = {0};
-    int hexadecimal[8] = {0};
-
-    printf("[" RED "%s " RESET ":" CYAN "%-6hu" RESET
-		    "] Received " BLUE "%4d" RESET
-		    " bytes: %s",
-		    inet_ntop(
-			    AF_INET,
-			    &si_outra.sin_addr,
-			    ipAddressString,
-			    INET_ADDRSTRLEN
-			    ),
-		    si_outra.sin_port,
-		    receivedBytes,
-		    buffer);
-    if (countNChar(buffer, '\n', BUFFER_SIZE) > 0) printf("\n");
-
-    decimalToBinary(decimal, binary);
-    decToHex(decimal, hexadecimal);
-
-    char binaryStr[33] = {0}, hexaStr[8] = {0};
-
-    for (int i = 0; i < 32; i++)
-    {
-      binaryStr[i] = binary[31 - i] + '0';
-    }
-
-    for (int i = 7; i >= 0; i--)
-    {
-      char temp[2];
-      sprintf(temp, "%c", hexadecimal[i]);
-      strcat(hexaStr, temp);
-    }
-
-    char msg[1000] = {0};
-
-    sprintf(msg, "Número em binário: %s \nNúmero em hexadecimal: %s\n", binaryStr, hexaStr);
-
-    if (sendto(socketFD, msg, strlen(msg), 0, (struct sockaddr *)&si_outra, slen) < 0)
-    {
-      error("Erro no sendto");
-    }
-
-    // Espera recepção de mensagem (a chamada é bloqueante)
-    if ((receivedBytes = recvfrom(socketFD, buffer, BUFFER_SIZE, 0, (struct sockaddr *)&si_outra, (socklen_t *)&slen)) == -1)
-    {
-      error("Erro no recvfrom");
-    }
-    // Para ignorar o restante conteúdo (anterior do buffer)
-    buffer[receivedBytes] = '\0';
-  }
+				  (struct sockaddr *) &si_outra,
+				  slen
+		    ) < 0) {
+		  error("Erro no sendto");
+	  }
+  } while (strncmp(buffer, "SAIR", 5) != 0);
 
   // Fecha socket e termina programa
   close(socketFD);
   return 0;
-}
-
-void decimalToBinary(int decimal, int binary[32])
-{
-  for (int i = 0; i < 32; ++i)
-    binary[i] = 0;
-
-  int i = 0;
-
-  while (decimal > 0)
-  {
-    binary[i] = decimal & 1;
-    decimal = decimal >> 1;
-    i++;
-  }
-}
-
-void decToHex(int decimal, int hexadecimal[8])
-{
-  if (decimal == 0)
-  {
-    printf("Hexadecimal: 0\n");
-    return;
-  }
-
-  for (int i = 0; i < 8; ++i)
-    hexadecimal[i] = 0;
-
-  // char hexadecimal[100];
-  int indx = 0;
-
-  while (decimal > 0)
-  {
-    int remainder = decimal % 16;
-
-    if (remainder < 10)
-      hexadecimal[indx++] = remainder + '0';
-    else
-      hexadecimal[indx++] = remainder + 'A' - 10;
-
-    decimal /= 16;
-  }
 }

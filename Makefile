@@ -11,10 +11,10 @@ tcp-server: $(SRC_DIR)/tcp-server.c $(SRC_DIR)/debug.c $(SRC_DIR)/command.c $(SR
 tcp-client: $(SRC_DIR)/tcp-client.c $(SRC_DIR)/debug.c
 	$(CC) $(CFLAGS) -o $@ $^
 
-udp-server: $(SRC_DIR)/udp-server.c $(SRC_DIR)/debug.c
+udp-server: $(SRC_DIR)/udp-server.c $(SRC_DIR)/debug.c $(SRC_DIR)/utils.c
 	$(CC) $(CFLAGS) -o $@ $^
 
-udp-client: $(SRC_DIR)/udp-client.c
+udp-client: $(SRC_DIR)/udp-client.c $(SRC_DIR)/debug.c
 	$(CC) $(CFLAGS) -o $@ $^
 
 archive: ficha03-pl8-BernardoHaab-LuísGóis.zip

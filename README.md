@@ -56,7 +56,7 @@ Para mais informações ver a help usage page:
 ### Rodar um cliente
 
 ```sh
-./udp-client <number>
+./udp-client <ip> <port> <number>
 ```
 
 ### Demo
