@@ -41,28 +41,6 @@ int main(int argc, char *argv[])
   si_outra.sin_port = htons(PORT_OUT);
   si_outra.sin_addr.s_addr = htonl(INADDR_ANY);
 
-  // // Preenchimento da socket address structure
-  // si_minha.sin_family = AF_INET;
-  // si_minha.sin_port = htons(PORT_OUT);
-  // si_minha.sin_addr.s_addr = htonl(INADDR_ANY);
-
-  // // Associa o socket à informação de endereço
-  // if (bind(s, (struct sockaddr *)&si_minha, sizeof(si_minha)) == -1)
-  // {
-  //   erro("Erro no bind");
-  // }
-
-  // // Espera recepção de mensagem (a chamada é bloqueante)
-  // if ((recv_len = recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *)&si_outra, (socklen_t *)&slen)) == -1)
-  // {
-  //   erro("Erro no recvfrom");
-  // }
-  // // Para ignorar o restante conteúdo (anterior do buffer)
-  // buf[recv_len] = '\0';
-
-  // printf("Recebi uma mensagem do sistema com o endereço %s e o porto %d\n", inet_ntoa(si_outra.sin_addr), ntohs(si_outra.sin_port));
-  // printf("Conteúdo da mensagem: %s\n", buf);
-
   char number[5];
 
   strncpy(number, argv[1], 5);
