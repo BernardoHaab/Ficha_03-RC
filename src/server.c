@@ -23,6 +23,8 @@
 #define MOTD "Bem-vindo ao servidor de nomes do DEI. Indique o nome de dominio"
 #define loop for(;;)
 
+FILE *domainFile = NULL;
+
 void processClient(
 		const int clientSocketFD,
 		const struct sockaddr_in clientIPAddress
@@ -179,6 +181,11 @@ int main(int argc, char **argv)
 			"for client connections...\n");
 
 	const long clientIPAddressSize = sizeof(clientIPAddress);
+
+	domainFile = fopen(filePath, "r");
+	if (domainFile == NULL) {
+		error("Error opening file...\n");
+	}
 
 	loop {
 		// NOTE: Clean finished child process to avoid zombies

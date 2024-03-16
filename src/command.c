@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,6 +6,7 @@
 #include "command.h"
 
 #define DELIMITER " "
+#define DOMAIN_FILE_DELIMITER " "
 
 static const char *const command[] = {
 	[HELP] = "help",
@@ -44,12 +46,94 @@ void commandHelp(const char *const argument, char *response)
 	      );
 }
 
+extern FILE* domainFile;
+
 void commandDomain(const char *const argument, char *response)
 {
+#define DOMAIN_FOUND \
+	"O nome de domínio %s tem associado o endereço IP %s\n"
+#define DOMAIN_NOT_FOUND \
+	"O nome de domínio %s não tem um endereço IP associado\n"
 
+	if (domainFile == NULL) {
+		sprintf(
+				response,
+				DOMAIN_NOT_FOUND,
+				argument
+		       );
+		return;
+	}
+
+	fseek(domainFile, 0, SEEK_SET);
+
+	char *line = NULL;
+	size_t length = 0;
+	ssize_t nread;
+	bool found = false;
+
+	while (!found && (nread = getline(&line, &length, domainFile)) != -1) {
+		char *domain = strtok(line, DOMAIN_FILE_DELIMITER);
+		char *ip = strtok(NULL, "\n");
+
+		if (strcmp(argument, domain) == 0) {
+			found = true;
+			sprintf(response, DOMAIN_FOUND, domain, ip);
+			continue;
+		}
+	}
+
+	free(line);
+
+	if (!found) {
+		sprintf(
+				response,
+				DOMAIN_NOT_FOUND,
+				argument
+		       );
+	}
 }
 
+// FIX: NOT WORKING
 void commandIp(const char *const argument, char *response)
 {
+#define IP_FOUND \
+	"O IP %s tem associado o dominio %s\n"
+#define IP_NOT_FOUND \
+	"O IP %s não tem um dominio associado\n"
 
+	if (domainFile == NULL) {
+		sprintf(
+				response,
+				IP_NOT_FOUND,
+				argument
+		       );
+	}
+
+	fseek(domainFile, 0, SEEK_SET);
+
+	char *line = NULL;
+	size_t length = 0;
+	ssize_t nread;
+	bool found = false;
+
+	while (!found && (nread = getline(&line, &length, domainFile)) != -1) {
+		char *domain = strtok(line, DOMAIN_FILE_DELIMITER);
+		char *ip = strtok(NULL, "\n");
+
+		if (strcmp(argument, ip) == 0) {
+			found = true;
+			sprintf(response, IP_FOUND, domain, ip);
+			continue;
+		}
+	}
+
+	free(line);
+
+	if (!found) {
+		sprintf(
+				response,
+				IP_NOT_FOUND,
+				argument
+		       );
+	}
 }
