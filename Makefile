@@ -1,16 +1,30 @@
 all: server client udp_server
 
 CC=gcc
-CFLAGS=-Wall -Wextra -g
+CFLAGS=-Wall -Wextra -g -I$(PWD)/include
 
-server: ex2/server.c
-	$(CC) $(CFLAGS) -o server ex2/server.c
+SRC_DIR = src
 
-client: ex2/client.c
-	$(CC) $(CFLAGS) -o client ex2/client.c
+server: $(SRC_DIR)/server.c $(SRC_DIR)/debug.c $(SRC_DIR)/command.c
+	$(CC) $(CFLAGS) -o $@ $^
+
+client: $(SRC_DIR)/client.c $(SRC_DIR)/debug.c
+	$(CC) $(CFLAGS) -o $@ $^
 
 udp_server: ex3/udp_server.c
-	$(CC) $(CFLAGS) -o udp_server ex3/udp_server.c
+	$(CC) $(CFLAGS) -o $@ $^
 
 clean:
 	rm -f server client udp_server
+
+.PHONY: .clangd
+.clangd:
+	rm --force $@
+
+	@echo Diagnostics: | tee --append $@
+	@echo '  UnusedIncludes: Strict' | tee --append $@
+	@echo '  MissingIncludes: Strict' | tee --append $@
+	@echo CompileFlags: | tee --append $@
+	@echo '  Add:' | tee --append $@
+
+	@for flag in $(CFLAGS) ; do echo "    - $$flag" | tee --append $@ ; done
