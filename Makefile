@@ -11,7 +11,7 @@ tcp-server: $(SRC_DIR)/tcp-server.c $(SRC_DIR)/debug.c $(SRC_DIR)/command.c
 tcp-client: $(SRC_DIR)/tcp-client.c $(SRC_DIR)/debug.c
 	$(CC) $(CFLAGS) -o $@ $^
 
-udp-server: $(SRC_DIR)/udp-server.c
+udp-server: $(SRC_DIR)/udp-server.c $(SRC_DIR)/debug.c
 	$(CC) $(CFLAGS) -o $@ $^
 
 udp-client: $(SRC_DIR)/udp-client.c

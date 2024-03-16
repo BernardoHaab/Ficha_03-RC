@@ -45,7 +45,9 @@ void processClient(
 
 		if (nread > 0) {
 			char ipAddressString[INET_ADDRSTRLEN] = { [0] = '\0' };
-			printf("[%s:%-6hu] Received %4d bytes: %s\n",
+			printf("[" RED "%s" RESET ":" CYAN "%-6hu" RESET
+					"] Received " BLUE "%4d" RESET
+					" bytes: %s",
 					inet_ntop(
 						AF_INET,
 						&clientIPAddress.sin_addr,
@@ -115,8 +117,8 @@ int main(int argc, char **argv)
 {
 	int c;
 	char *ipAddress = SERVER_IP_DEFAULT;
-	int port = SERVER_PORT_DEFAULT;
-	char *filePath = NULL;
+	int port        = SERVER_PORT_DEFAULT;
+	char *filePath  = NULL;
 
 	static struct option long_options[] = {
 		{"address", required_argument, 0, 'a'},
@@ -148,8 +150,6 @@ int main(int argc, char **argv)
 				filePath = optarg;
 				break;
 			case 'h':
-				usage(argv[0]);
-				return 0;
 			case ':':
 			case '?':
 			default:
@@ -162,9 +162,9 @@ int main(int argc, char **argv)
 	struct sockaddr_in serverIPAddress = {0};
 	struct sockaddr_in clientIPAddress = {0};
 
-	serverIPAddress.sin_family = AF_INET;
+	serverIPAddress.sin_family      = AF_INET;
 	serverIPAddress.sin_addr.s_addr = inet_addr(ipAddress);
-	serverIPAddress.sin_port = htons(port);
+	serverIPAddress.sin_port        = htons(port);
 
 	serverSocketFD = socket(AF_INET, SOCK_STREAM, 0);
 	if (serverSocketFD < 0) {
