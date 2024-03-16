@@ -8,12 +8,11 @@
 #define DELIMITER " "
 #define DOMAIN_FILE_DELIMITER " "
 
-static const char *const command[] = {
-	[HELP] = "help",
-	[DOMAIN] = "domain",
-};
-
-void processCommand(const char *const buffer, const size_t bufferSize, char *response)
+void processCommand(
+		const char *const buffer,
+		const size_t bufferSize,
+		char *response
+		)
 {
 	char *bufferClone = malloc(sizeof(buffer[0]) * bufferSize);
 	char *bufferCloneFree = bufferClone;
@@ -23,12 +22,18 @@ void processCommand(const char *const buffer, const size_t bufferSize, char *res
 	char *commandString = strtok(bufferClone, DELIMITER);
 	char *argumentString = strtok(NULL, "");
 
-#define WRAPPER(enum, text, function) \
+	bool commandFound = false;
+#define WRAPPER(enum, text, usage, function) \
 	if (strncmp(commandString, text, strlen(text)) == 0) { \
+		commandFound = true; \
 		function(argumentString, response); \
 	}
 	COMMAND_ENUM
 #undef WRAPPER
+
+	if (!commandFound) {
+		strcpy(response, "Command not found. Tip: Type \"help\"\n");
+	}
 
 	free(bufferCloneFree);
 }
@@ -38,8 +43,8 @@ void commandHelp(const char *const argument, char *response)
 	(void) argument;
 
 	strcpy(response, "List of available commands:"
-#define WRAPPER(enum, text, function) \
-			"\n- " text
+#define WRAPPER(enum, text, usage, function) \
+			"\n- " usage
 			COMMAND_ENUM
 #undef WRAPPER
 			"\n"

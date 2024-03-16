@@ -4,11 +4,11 @@
 #include <stdlib.h>
 
 #define COMMAND_ENUM \
-	WRAPPER(HELP, "help", commandHelp) \
-	WRAPPER(DOMAIN, "domain", commandDomain) \
-	WRAPPER(IP, "ip", commandIp)
+	WRAPPER(HELP, "help", "help", commandHelp) \
+	WRAPPER(DOMAIN, "domain", "domain <domain>", commandDomain) \
+	WRAPPER(IP, "ip", "ip <ip>", commandIp)
 typedef enum {
-#define WRAPPER(enum, text, function) enum,
+#define WRAPPER(enum, text, usage, function) enum,
 	COMMAND_ENUM
 #undef WRAPPER
 } Command;
