@@ -1,21 +1,24 @@
-all: server client udp_server
+all: tcp-server tcp-client udp-server udp-client
 
 CC=gcc
 CFLAGS=-Wall -Wextra -g -I$(PWD)/include
 
 SRC_DIR = src
 
-server: $(SRC_DIR)/server.c $(SRC_DIR)/debug.c $(SRC_DIR)/command.c
+tcp-server: $(SRC_DIR)/tcp-server.c $(SRC_DIR)/debug.c $(SRC_DIR)/command.c
 	$(CC) $(CFLAGS) -o $@ $^
 
-client: $(SRC_DIR)/client.c $(SRC_DIR)/debug.c
+tcp-client: $(SRC_DIR)/tcp-client.c $(SRC_DIR)/debug.c
 	$(CC) $(CFLAGS) -o $@ $^
 
-udp_server: ex3/udp_server.c
+udp-server: $(SRC_DIR)/udp-server.c
+	$(CC) $(CFLAGS) -o $@ $^
+
+udp-client: $(SRC_DIR)/udp-client.c
 	$(CC) $(CFLAGS) -o $@ $^
 
 clean:
-	rm -f server client udp_server
+	rm -f tcp-server tcp-client udp-server udp-client
 
 .PHONY: .clangd
 .clangd:

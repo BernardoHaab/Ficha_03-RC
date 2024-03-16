@@ -1,9 +1,10 @@
 *.cast
 .clangd
-client
 *.png
-server
-udp_server
+tcp-client
+tcp-server
+udp-client
+udp-server
 .vscode
 # Created by https://www.toptal.com/developers/gitignore/api/c
 # Edit at https://www.toptal.com/developers/gitignore?templates=c
