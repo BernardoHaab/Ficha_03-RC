@@ -1,5 +1,7 @@
+!/assets/*.png
 *.cast
 .clangd
+*.pdf
 *.png
 tcp-client
 tcp-server

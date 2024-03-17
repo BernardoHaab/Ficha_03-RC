@@ -17,10 +17,13 @@ udp-server: $(SRC_DIR)/udp-server.c $(SRC_DIR)/debug.c $(SRC_DIR)/utils.c
 udp-client: $(SRC_DIR)/udp-client.c $(SRC_DIR)/debug.c
 	$(CC) $(CFLAGS) -o $@ $^
 
+relatorio.pdf: docs/relatorio.md
+	pandoc --standalone --resource-path=assets --output $@ $<
+
 archive: ficha03-pl8-BernardoHaab-LuísGóis.zip
 .PHONY: ficha03-pl8-BernardoHaab-LuísGóis.zip
-ficha03-pl8-BernardoHaab-LuísGóis.zip:
-	git archive --output=$@ HEAD
+ficha03-pl8-BernardoHaab-LuísGóis.zip: relatorio.pdf
+	git archive --output=$@ --add-file=$< HEAD
 
 clean:
 	rm -f tcp-server tcp-client udp-server udp-client
