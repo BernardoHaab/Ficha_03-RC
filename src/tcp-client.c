@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 {
 	struct sockaddr_in serverIPAddress = {0};
 	int socketFD;
-	char buffer[BUFFER_SIZE] = { [0] = '\0' };
+	char buffer[BUFFER_SIZE] = { [0] = '\0' , [BUFFER_SIZE - 1] = '\0' };
 
 	if (argc < 3) {
 		usage(argv[0]);
@@ -80,7 +80,7 @@ int main(int argc, char **argv)
 
 		const size_t bufferLength = strnlen(buffer, BUFFER_SIZE);
 
-		write(socketFD, buffer, bufferLength);
+		write(socketFD, buffer, bufferLength + 1);
 	}
 
 	debugMessage(stdout, INFO, "Closing connection with server ");

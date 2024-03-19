@@ -94,7 +94,8 @@ void processClient(
 			debugMessage(stderr, ERROR, "Reading from client\n");
 		}
 
-		write(clientSocketFD, responseBuffer, BUFFER_SIZE);
+		const size_t responseBufferLength = strnlen(responseBuffer, BUFFER_SIZE);
+		write(clientSocketFD, responseBuffer, responseBufferLength + 1);
 	} while (nread > 0);
 
 	close(clientSocketFD);
